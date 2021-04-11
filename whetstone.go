@@ -21,7 +21,8 @@ func main() {
 	var x, y, z float64
 	var whet_save, kilowhet float32
 	var error, whet_err, percent_err float32
-	var begin_time, end_time, dif_time float32
+	var dif_time time.Duration
+	var begin_time time.Time
 	var dif_save float32
 
 	kilowhet = 0
@@ -39,7 +40,7 @@ func main() {
 		fmt.Printf("Pass number: %d\n", npass)
 
 		kount = 0
-		begin_time = seconds()
+		begin_time = time.Now()
 
 		for kount < outer {
 			t1 = 0.49995
@@ -146,21 +147,21 @@ func main() {
 
 		}
 
-		end_time = seconds()
+		// end_time = time.Now()
 
-		dif_time = end_time - begin_time
-		kilowhet = float32(100*inner*outer) / dif_time
-		fmt.Printf("Elapsed time: %s - MIPS: %f\n", time.Duration(dif_time*float32(time.Second)), kilowhet/1000)
+		dif_time = time.Since(begin_time)
+		kilowhet = float32(100*inner*outer) / float32(dif_time.Seconds())
+		fmt.Printf("Elapsed time: %s - MIPS: %f\n", dif_time, kilowhet/1000)
 
 		npass += 1
 		if npass < max_pass {
-			dif_save = dif_time
+			dif_save = float32(dif_time.Seconds())
 			whet_save = kilowhet
 			inner *= max_pass
 		}
 	}
 
-	error = dif_time - (dif_save * float32(max_pass))
+	error = float32(dif_time.Seconds()) - (dif_save * float32(max_pass))
 	whet_err = whet_save - kilowhet
 	percent_err = whet_err * 100 / kilowhet
 	fmt.Println("------------------------------------------")
@@ -190,18 +191,4 @@ func sub3() {
 	e1[j] = e1[k]
 	e1[k] = e1[l]
 	e1[l] = e1[j]
-}
-
-func seconds() float32 {
-	now := time.Now()
-
-	mins := now.Minute()
-	secs := now.Second()
-	mills := now.Nanosecond() / 1000000
-	hour := now.Hour()
-	s1 := float32((hour*3600 + mins*60 + secs)) + (float32(mills) * 0.001)
-
-	// fmt.Printf("hour: %d - mins: %d - secs: %d - mils: %d\n", hour, mins, secs, mills)
-
-	return s1
 }
